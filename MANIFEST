@@ -1,5 +1,8 @@
+CHANGES
 MANIFEST
 Makefile.PL
 README
-test.pl
 lib/Data/Hexdumper.pm
+t/all.t
+t/pod-coverage.t
+t/pod.t
