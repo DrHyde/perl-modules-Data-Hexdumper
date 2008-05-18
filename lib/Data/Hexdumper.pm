@@ -1,6 +1,6 @@
 package Data::Hexdumper;
 
-$VERSION = "1.3";
+$VERSION = "1.4";
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -122,7 +122,7 @@ sub hexdump {
 
     # sanity-check the parameters
 
-    die("No data given to hexdump.") unless $data;
+    die("No data given to hexdump.") unless length($data);
     die("start_position must be numeric.") if($start_position=~/\D/);
     die("number_format $number_format not recognised.") unless $num_bytes;
     die("end_position must be numeric.") if($end_position=~/\D/);
@@ -142,7 +142,7 @@ sub hexdump {
 
     my $output=''; # where we put the formatted results
 
-    while($data) {
+    while(length($data)) {
         # Get a chunk
         my $chunk = substr($data, 0, CHUNKSIZE);
         $data = ($chunk eq $data) ? '' : substr($data, CHUNKSIZE);
@@ -223,6 +223,8 @@ you may perl itself.
 =head1 THANKS TO ...
 
 MHX, for reporting a bug when dumping a single byte of data
+
+Stefan Siegl, for reporting a bug when dumping an ASCII 0
 
 =cut
 

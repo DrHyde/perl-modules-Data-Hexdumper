@@ -1,7 +1,7 @@
 #!perl -w
 use strict;
 
-use Test::More tests => 10;
+use Test::More tests => 11;
 
 use_ok('Data::Hexdumper', 'hexdump');
 
@@ -117,3 +117,7 @@ $results = hexdump(data => '!');
 ok("\n".$results eq q{
   0x0000 : 21                                              : !
 }, "Single byte data");
+
+ok("\n".hexdump(data => '0') eq q{
+  0x0000 : 30                                              : 0
+}, "Can dump a zero byte");
