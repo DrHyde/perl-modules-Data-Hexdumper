@@ -86,12 +86,36 @@ end of C<data>.
 
 =item number_format
 
-A string specifying how to format the data.  This tells us whether the
-data consists of bytes, shorts (16-bit values), longs (32-bit values),
-and whether they are big- or little-endian.  The permissible values are
-C<C>, C<S>, C<n>, C<v>, C<L>, C<N>, C<V>, C<Q>, C<QE<gt>>, C<QE<lt>>,
-having exactly the same meanings as they do in C<unpack>.  It defaults
-to 'C'.
+A string specifying how to format the data.  It can be any of the following,
+which you will notice have the same meanings as they do to perl's C<pack>
+function:
+
+=over
+
+=item C - unsigned char
+
+=item S - unsigned 16-bit, native endianness
+
+=item v - unsigned 16-bit, little-endian
+
+=item n - unsigned 16-bit, big-endian
+
+=item L - unsigned 32-bit, native endianness
+
+=item V - unsigned 32-bit, little-endian
+
+=item N - unsigned 32-bit, big-endian
+
+=item Q - unsigned 64-bit, native endianness
+
+=item QE<lt> - unsigned 64-bit, little-endian
+
+=item QE<gt> - unsigned 64-bit, big-endian
+
+=back
+
+It defaults to 'C', and the C<Q> variants are only available if your perl
+was built with 64 bit ints.
 
 =item suppress_warnings
 
@@ -116,11 +140,6 @@ followed by an optional hashref of the other options:
         $string,
         { start_position => 100, end_position   => 148 }
     );
-
-=head2 Hexdump - this function has now been removed
-
-The 'Hexdump' function (note the different capitalisation) was deprecated
-in version 1.0.1, and was removed in version 1.3 five years later.
 
 =cut
 
@@ -240,10 +259,17 @@ is on Sourceforge and can be viewed in a web browser here:
 
 =head1 AUTHOR, COPYRIGHT and LICENCE
 
-This software is copyright 2001 - 2007 David Cantrell (david@cantrell.org.uk).
+Copyright 2001 - 2009 David Cantrell E<lt>F<david@cantrell.org.uk>E<gt>
 
-You may use, modify and distribute this software under the same terms as
-you may perl itself.
+This software is free-as-in-speech software, and may be used,
+distributed, and modified under the terms of either the GNU
+General Public Licence version 2 or the Artistic Licence.  It's
+up to you which one you use.  The full text of the licences can
+be found in the files GPL2.txt and ARTISTIC.txt, respectively.
+
+=head1 CONSPIRACY
+
+This module is also free-as-in-mason software.
 
 =head1 THANKS TO ...
 

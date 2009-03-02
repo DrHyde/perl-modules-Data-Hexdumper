@@ -1,4 +1,4 @@
-2.0     2009-XX-XX      Add hexdump($string) and hexdump($string, { opts })
+2.0     2009-03-02      Add hexdump($string) and hexdump($string, { opts })
                         Add 64-bit support
 
 1.4     2008-05-18      Fix bug where data is ASCII 0 (thanks to
