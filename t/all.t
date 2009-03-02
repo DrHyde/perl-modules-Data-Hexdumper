@@ -1,34 +1,34 @@
 #!perl -w
 use strict;
 
-use Test::More tests => 11;
+use Test::More tests => 14;
 
 use_ok('Data::Hexdumper', 'hexdump');
 
 ok("\n".hexdump(
-	data => join('', map { pack('C', $_) } (0x20 .. 0x3F)),
-	number_format => 'N',
-	start_position => 0,
-	end_position => 0x1F
+    data => join('', map { pack('C', $_) } (0x20 .. 0x3F)),
+    number_format => 'N',
+    start_position => 0,
+    end_position => 0x1F
 ) eq q{
   0x0000 : 20212223 24252627 28292A2B 2C2D2E2F             : .!"#$%&'()*+,-./
   0x0010 : 30313233 34353637 38393A3B 3C3D3E3F             : 0123456789:;<=>?
 }, "big-endian 32-bit words, no padding");
 
 ok("\n".hexdump(
-	data => join('', map { pack('C', $_) } (0x20 .. 0x3F)),
-	number_format => 'N',
-	start_position => 0,
-	end_position => 0x1F,
-	space_as_space => 1
+    data => join('', map { pack('C', $_) } (0x20 .. 0x3F)),
+    number_format => 'N',
+    start_position => 0,
+    end_position => 0x1F,
+    space_as_space => 1
 ) eq q{
   0x0000 : 20212223 24252627 28292A2B 2C2D2E2F             :  !"#$%&'()*+,-./
   0x0010 : 30313233 34353637 38393A3B 3C3D3E3F             : 0123456789:;<=>?
 }, "space_as_space");
 
 ok("\n".hexdump(
-	data => join('', map { pack('C', $_) } (0x20 .. 0x3F)),
-	number_format => 'N'
+    data => join('', map { pack('C', $_) } (0x20 .. 0x3F)),
+    number_format => 'N'
 ) eq q{
   0x0000 : 20212223 24252627 28292A2B 2C2D2E2F             : .!"#$%&'()*+,-./
   0x0010 : 30313233 34353637 38393A3B 3C3D3E3F             : 0123456789:;<=>?
@@ -53,50 +53,50 @@ ok("\n".$results eq q{
 }, "other data formats");
 
 ok("\n".hexdump(
-	data => join('', map { pack('C', $_) } (0x10 .. 0x2F)),
-	number_format => 'N'
+    data => join('', map { pack('C', $_) } (0x10 .. 0x2F)),
+    number_format => 'N'
 ) eq q{
   0x0000 : 10111213 14151617 18191A1B 1C1D1E1F             : ................
   0x0010 : 20212223 24252627 28292A2B 2C2D2E2F             : .!"#$%&'()*+,-./
 }, "unprintable characters");
 
 ok(hexdump(
-	data => join('', map { pack('C', $_) } (0x10 .. 0x2F)),
-	number_format => 'S'
+    data => join('', map { pack('C', $_) } (0x10 .. 0x2F)),
+    number_format => 'S'
 ) eq hexdump(
-	data => join('', map { pack('C', $_) } (0x10 .. 0x2F)),
-	number_format => 'n'
+    data => join('', map { pack('C', $_) } (0x10 .. 0x2F)),
+    number_format => 'n'
 ) || hexdump(
-	data => join('', map { pack('C', $_) } (0x10 .. 0x2F)),
-	number_format => 'S'
+    data => join('', map { pack('C', $_) } (0x10 .. 0x2F)),
+    number_format => 'S'
 ) eq hexdump(
-	data => join('', map { pack('C', $_) } (0x10 .. 0x2F)),
-	number_format => 'v'
+    data => join('', map { pack('C', $_) } (0x10 .. 0x2F)),
+    number_format => 'v'
 ), "S eq n or v");
 
 ok(hexdump(
-	data => join('', map { pack('C', $_) } (0x10 .. 0x2F)),
-	number_format => 'L'
+    data => join('', map { pack('C', $_) } (0x10 .. 0x2F)),
+    number_format => 'L'
 ) eq hexdump(
-	data => join('', map { pack('C', $_) } (0x10 .. 0x2F)),
-	number_format => 'N'
+    data => join('', map { pack('C', $_) } (0x10 .. 0x2F)),
+    number_format => 'N'
 ) || hexdump(
-	data => join('', map { pack('C', $_) } (0x10 .. 0x2F)),
-	number_format => 'L'
+    data => join('', map { pack('C', $_) } (0x10 .. 0x2F)),
+    number_format => 'L'
 ) eq hexdump(
-	data => join('', map { pack('C', $_) } (0x10 .. 0x2F)),
-	number_format => 'V'
+    data => join('', map { pack('C', $_) } (0x10 .. 0x2F)),
+    number_format => 'V'
 ), "L eq N or V");
 
 $results = '';
 foreach my $format (qw(N n)) {
-	foreach my $max (0x3C, 0x3D, 0x3E) {
-		$results .= hexdump(
-			data => join('', map { pack('C', $_) } (0x20 .. $max)),
-    		number_format => $format,
-    		suppress_warnings => 1
-    	);
-	}
+    foreach my $max (0x3C, 0x3D, 0x3E) {
+        $results .= hexdump(
+            data => join('', map { pack('C', $_) } (0x20 .. $max)),
+            number_format => $format,
+            suppress_warnings => 1
+        );
+    }
 }
 ok("\n".$results eq q{
   0x0000 : 20212223 24252627 28292A2B 2C2D2E2F             : .!"#$%&'()*+,-./
@@ -120,4 +120,35 @@ ok("\n".$results eq q{
 
 ok("\n".hexdump(data => '0') eq q{
   0x0000 : 30                                              : 0
-}, "Can dump a zero byte");
+}, "Can dump a zero (0, not NULL!) byte");
+
+ok(hexdump(data => 'abcdefghijkl') eq hexdump('abcdefghijkl'),
+    'hexdump($string) works');
+ok(hexdump(
+    data => join('', map { pack('C', $_) } (0x00 .. 0x3F)),
+    number_format => 'N',
+    start_position => 0,
+    end_position => 0x1F,
+    space_as_space => 1
+) eq hexdump(
+    join('', map { pack('C', $_) } (0x00 .. 0x3F)),
+    {
+        number_format => 'N',
+        start_position => 0,
+        end_position => 0x1F,
+        space_as_space => 1
+    }
+), 'hexdump($string, {... opts ...}) works');
+
+ok((
+    ( hexdump('abcdefghijklmnop', { number_format => 'Q' }) eq 
+      hexdump('abcdefghijklmnop', { number_format => 'Q<' }) ) ||
+    ( hexdump('abcdefghijklmnop', { number_format => 'Q' }) eq 
+      hexdump('abcdefghijklmnop', { number_format => 'Q>' }) )
+), "64 bit native byte order works");
+ok("\n".hexdump('abcdefghijklmnop', { number_format => 'Q<' }) eq q{
+  ...
+}, "64 bit little-endian works");
+ok("\n".hexdump('abcdefghijklmnop', { number_format => 'Q>' }) eq q{
+  ...
+}, "64 bit big-endian works");

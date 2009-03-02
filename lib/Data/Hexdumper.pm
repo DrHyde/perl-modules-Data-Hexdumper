@@ -1,6 +1,6 @@
 package Data::Hexdumper;
 
-$VERSION = "1.4";
+$VERSION = "2.0";
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -14,13 +14,16 @@ use constant CHUNKSIZE => 16;
 
 # static data, tells us the length of each type of word
 my %num_bytes=(
-    C => 1, # unsigned char
-    S => 2, # unsigned short      (shorts are ALWAYS 16-bit)
-    n => 2, # big-endian short
-    v => 2, # little-endian short
-    L => 4, # unsigned long       (longs are ALWAYS 32-bit)
-    N => 4, # big-endian long
-    V => 4, # little-endian long
+    'C'  => 1, # unsigned char
+    'S'  => 2, # unsigned 16-bit
+    'v'  => 2, # unsigned 16-bit, little-endian
+    'n'  => 2, # unsigned 16-bit, big-endian
+    'L'  => 4, # unsigned 32-bit
+    'V'  => 4, # unsigned 32-bit, little-endian
+    'N'  => 4, # unsigned 32-bit, big-endian
+    'Q'  => 8, # unsigned 64-bit
+    'Q<' => 8, # unsigned 64-bit, little-endian
+    'Q>' => 8, # unsigned 64-bit, big-endian
 );
 
 =head1 NAME
@@ -83,11 +86,12 @@ end of C<data>.
 
 =item number_format
 
-A character specifying how to format the data.  This tells us whether the
+A string specifying how to format the data.  This tells us whether the
 data consists of bytes, shorts (16-bit values), longs (32-bit values),
 and whether they are big- or little-endian.  The permissible values are
-C<C>, C<S>, C<n>, C<v>, C<L>, C<N>, and C<V>, having exactly the same
-meanings as they do in C<unpack>.  It defaults to 'C'.
+C<C>, C<S>, C<n>, C<v>, C<L>, C<N>, C<V>, C<Q>, C<QE<gt>>, C<QE<lt>>,
+having exactly the same meanings as they do in C<unpack>.  It defaults
+to 'C'.
 
 =item suppress_warnings
 
@@ -103,6 +107,16 @@ spaces Otherwise, spaces will be printed as full stops / periods (ASCII
 
 =back
 
+Alternatively, you can supply the parameters as a scalar chunk of data
+followed by an optional hashref of the other options:
+
+    $results = hexdump($string);
+
+    $results = hexdump(
+        $string,
+        { start_position => 100, end_position   => 148 }
+    );
+
 =head2 Hexdump - this function has now been removed
 
 The 'Hexdump' function (note the different capitalisation) was deprecated
@@ -111,7 +125,18 @@ in version 1.0.1, and was removed in version 1.3 five years later.
 =cut
 
 sub hexdump {
-    my %params=@_;
+    my @params = @_;
+    # first let's see if we need to massage the data into canonical form ...
+    if($#params == 0) {                 # one param: hexdump($string)
+        @params = (data => $params[0]);
+    } elsif($#params == 1 && ref($params[1])) { # two: hexdump($foo, {...})
+        @params = (
+            data => $params[0],
+            %{$params[1]}
+        )
+    }
+
+    my %params=@params;
     my($data, $number_format, $start_position, $end_position)=
         @params{qw(data number_format start_position end_position)};
 
@@ -194,8 +219,8 @@ perldoc -f pack
 
 There is no support for syntax like 'S!' like what pack() has, so it's
 not possible to tell it to use your environment's native word-lengths.
-Only 16- and 32-bit shorts and longs are supported.  There is no support
-for 64-bit datatypes.
+64-bit data is only supported on perls that have been built with 64 bit
+integer support.
 
 It formats the data for an 80 column screen, perhaps this should be a
 frobbable parameter.

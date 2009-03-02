@@ -1,5 +1,9 @@
+2.0     2009-XX-XX      Add hexdump($string) and hexdump($string, { opts })
+                        Add 64-bit support
+
 1.4     2008-05-18      Fix bug where data is ASCII 0 (thanks to
                           Stefan Siegl)
+
 1.3     2007-08-20      Fix bug when data length is one character
 1.2     2004-02-20
 1.1     2003-08-10      Emit fewer warnings
