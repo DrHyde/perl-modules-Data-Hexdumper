@@ -1,9 +1,14 @@
 #!perl -w
+# $Id: regression.t,v 1.1 2009/03/02 22:00:39 drhyde Exp $
+
 use strict;
 
 use Test::More tests => 14;
 
 use_ok('Data::Hexdumper', 'hexdump');
+
+eval { hexdump('foo', {number_format => 'R'}) };
+ok($@, "invalid format is fatal: $@");
 
 ok("\n".hexdump(
     data => join('', map { pack('C', $_) } (0x20 .. 0x3F)),
@@ -139,16 +144,3 @@ ok(hexdump(
         space_as_space => 1
     }
 ), 'hexdump($string, {... opts ...}) works');
-
-ok((
-    ( hexdump('abcdefghijklmnop', { number_format => 'Q' }) eq 
-      hexdump('abcdefghijklmnop', { number_format => 'Q<' }) ) ||
-    ( hexdump('abcdefghijklmnop', { number_format => 'Q' }) eq 
-      hexdump('abcdefghijklmnop', { number_format => 'Q>' }) )
-), "64 bit native byte order works");
-ok("\n".hexdump('abcdefghijklmnop', { number_format => 'Q<' }) eq q{
-  ...
-}, "64 bit little-endian works");
-ok("\n".hexdump('abcdefghijklmnop', { number_format => 'Q>' }) eq q{
-  ...
-}, "64 bit big-endian works");

@@ -3,6 +3,7 @@ MANIFEST
 Makefile.PL
 README
 lib/Data/Hexdumper.pm
-t/all.t
+t/regression.t
+t/64.t
 t/pod-coverage.t
 t/pod.t
