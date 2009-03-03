@@ -9,3 +9,4 @@ t/pod-coverage.t
 t/pod.t
 ARTISTIC.txt
 GPL2.txt
+t/endianspecifiers.t

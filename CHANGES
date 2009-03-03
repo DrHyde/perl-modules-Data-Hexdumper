@@ -1,3 +1,9 @@
+2.01    2009-03-03      Bugfix: Q< and Q> now work on pre- perl 5.10;
+                        64-bit support now works on 32-bit machines, and
+			  < and > work on pre- perl 5.10.0 (this is because
+			  to implement the Q>/Q< fix, I needed to emulate
+			  pack() so am no longer bound by its limitations)
+			 
 2.0     2009-03-02      Add hexdump($string) and hexdump($string, { opts })
                         Add 64-bit support
 

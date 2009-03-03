@@ -1,6 +1,7 @@
+# $Id: Hexdumper.pm,v 1.6 2009/03/03 20:18:06 drhyde Exp $
 package Data::Hexdumper;
 
-$VERSION = "2.0";
+$VERSION = "2.01";
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -9,6 +10,9 @@ require Exporter;
 use strict;
 use warnings;
 
+use constant BIGENDIAN    => (unpack("h*", pack("s", 1)) =~ /01/);
+use constant LITTLEENDIAN => (unpack("h*", pack("s", 1)) =~ /^1/);
+
 # this is a magic number
 use constant CHUNKSIZE => 16;
 
@@ -16,11 +20,15 @@ use constant CHUNKSIZE => 16;
 my %num_bytes=(
     'C'  => 1, # unsigned char
     'S'  => 2, # unsigned 16-bit
-    'v'  => 2, # unsigned 16-bit, little-endian
-    'n'  => 2, # unsigned 16-bit, big-endian
     'L'  => 4, # unsigned 32-bit
+    'L<' => 4, # unsigned 32-bit, little-endian
+    'L>' => 4, # unsigned 32-bit, big-endian
     'V'  => 4, # unsigned 32-bit, little-endian
     'N'  => 4, # unsigned 32-bit, big-endian
+    'S<' => 2, # unsigned 16-bit, little-endian
+    'S>' => 2, # unsigned 16-bit, big-endian
+    'v'  => 2, # unsigned 16-bit, little-endian
+    'n'  => 2, # unsigned 16-bit, big-endian
     'Q'  => 8, # unsigned 64-bit
     'Q<' => 8, # unsigned 64-bit, little-endian
     'Q>' => 8, # unsigned 64-bit, big-endian
@@ -96,15 +104,15 @@ function:
 
 =item S - unsigned 16-bit, native endianness
 
-=item v - unsigned 16-bit, little-endian
+=item v or SE<lt> - unsigned 16-bit, little-endian
 
-=item n - unsigned 16-bit, big-endian
+=item n or SE<gt> - unsigned 16-bit, big-endian
 
 =item L - unsigned 32-bit, native endianness
 
-=item V - unsigned 32-bit, little-endian
+=item V or LE<lt> - unsigned 32-bit, little-endian
 
-=item N - unsigned 32-bit, big-endian
+=item N or LE<gt> - unsigned 32-bit, big-endian
 
 =item Q - unsigned 64-bit, native endianness
 
@@ -114,8 +122,10 @@ function:
 
 =back
 
-It defaults to 'C', and the C<Q> variants are only available if your perl
-was built with 64 bit ints.
+It defaults to 'C'.  Note that 64-bit formats are *always* available,
+even if your perl is only 32-bit.  Similarly, using E<lt> and E<gt> on
+the S and L formats always works, even if you're using a pre 5.10.0 perl.
+That's because this code doesn't use C<pack()>.
 
 =item suppress_warnings
 
@@ -163,6 +173,10 @@ sub hexdump {
     $number_format ||= 'C';
     $end_position ||= length($data)-1;
     my $num_bytes = $num_bytes{$number_format};
+    if($number_format eq 'V') { $number_format = 'L<'; }
+    if($number_format eq 'N') { $number_format = 'L>'; }
+    if($number_format eq 'v') { $number_format = 'S<'; }
+    if($number_format eq 'n') { $number_format = 'S>'; }
 
     # sanity-check the parameters
 
@@ -205,8 +219,7 @@ sub hexdump {
             if(length($line)>$num_bytes) {
                 $line=substr($line,$num_bytes);
             } else { $line=''; }
-            my $thisData=sprintf('%0'.($num_bytes*2).'X ',
-                       unpack($number_format, $thisElement));
+            my $thisData = _format_word($number_format, $thisElement);
             $lengthOfLine+=length($thisData);
             $output.=$thisData;
         }
@@ -224,6 +237,17 @@ sub hexdump {
     $output;
 }
 
+sub _format_word {
+    my($format, $data) = @_;
+
+    # big endian
+    my @bytes = map { ord($_) } split(//, $data);
+    # make little endian if necessary
+    @bytes = reverse(@bytes)
+        if($format =~ /</ || ($format !~ />/ && LITTLEENDIAN));
+    return join('', map { sprintf('%02X', $_) } @bytes).' ';
+}
+
 =head1 SEE ALSO
 
 L<Data::Dumper>
@@ -238,8 +262,6 @@ perldoc -f pack
 
 There is no support for syntax like 'S!' like what pack() has, so it's
 not possible to tell it to use your environment's native word-lengths.
-64-bit data is only supported on perls that have been built with 64 bit
-integer support.
 
 It formats the data for an 80 column screen, perhaps this should be a
 frobbable parameter.
