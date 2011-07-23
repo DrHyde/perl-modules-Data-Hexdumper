@@ -274,10 +274,10 @@ I welcome constructive criticism and bug reports.  Please report bugs either
 by email or via RT:
   L<http://rt.cpan.org/Public/Dist/Display.html?Name=Data-Hexdumper>
 
-The best bug reports contain a test file that fails with the code that is
-currently in CVS, and will pass once it has been fixed.  The CVS repository
-is on Sourceforge and can be viewed in a web browser here:
-  L<http://drhyde.cvs.sourceforge.net/drhyde/perlmodules/Data-Hexdumper/>
+The best bug reports contain a test file that fails with the current
+code, and will pass once it has been fixed.  The code repository
+is on Github:
+  L<git://github.com/DrHyde/perl-modules-Data-Hexdumper.git>
 
 =head1 AUTHOR, COPYRIGHT and LICENCE
 
