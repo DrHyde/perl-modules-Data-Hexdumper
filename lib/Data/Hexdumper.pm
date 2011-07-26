@@ -1,14 +1,14 @@
-# $Id: Hexdumper.pm,v 1.6 2009/03/03 20:18:06 drhyde Exp $
 package Data::Hexdumper;
+
+use strict;
+use warnings;
+use vars qw($VERSION @ISA @EXPORT);
 
 $VERSION = "2.01";
 
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(hexdump);
-
-use strict;
-use warnings;
 
 use constant BIGENDIAN    => (unpack("h*", pack("s", 1)) =~ /01/);
 use constant LITTLEENDIAN => (unpack("h*", pack("s", 1)) =~ /^1/);
