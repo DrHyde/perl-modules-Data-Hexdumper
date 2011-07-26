@@ -34,6 +34,19 @@ my %num_bytes=(
     'Q>' => 8, # unsigned 64-bit, big-endian
 );
 
+my %number_format_to_new_format = (
+  'C'  => '  %a : %C %C %C %C %C %C %C %C %C %C %C %C %C %C %C %C : %d',
+  'S'  => '  %a : %S %S %S %S %S %S %S %S         : %d',
+  'S<' => '  %a : %S< %S< %S< %S< %S< %S< %S< %S<         : %d',
+  'S>' => '  %a : %S> %S> %S> %S> %S> %S> %S> %S>         : %d',
+  'L'  => '  %a : %L %L %L %L             : %d',
+  'L<' => '  %a : %L< %L< %L< %L<             : %d',
+  'L>' => '  %a : %L> %L> %L> %L>             : %d',
+  'Q'  => '  %a : %Q %Q               : %d',
+  'Q<' => '  %a : %Q< %Q<               : %d',
+  'Q>' => '  %a : %Q> %Q>               : %d',
+);
+
 =head1 NAME
 
 Data::Hexdumper - Make binary data human-readable
@@ -126,6 +139,31 @@ It defaults to 'C'.  Note that 64-bit formats are *always* available,
 even if your perl is only 32-bit.  Similarly, using E<lt> and E<gt> on
 the S and L formats always works, even if you're using a pre 5.10.0 perl.
 That's because this code doesn't use C<pack()>.
+
+=item output_format
+
+This is an alternative and much more flexible (but more complex) method
+of specifying the output format.  Instead of specifying a single format
+for all your output, you can specify formats like:
+
+  %a : %C %S %L %Q : %d
+
+which will, on each line, display first the address, then a space, then
+a colon, then a single byte of data, then a space, then an unsigned
+16-bit value in native endianness, then a space, then ... then a colon,
+a space, then the characters representing your 15 byte record.
+
+You can use exactly the same characters and character sequences as are
+specified above for number_format, plus 'a' for the address, and 'd'
+for the data.  To output a literal % character, use %% as is normal
+with formats - see sprintf for details.
+
+Anything else will get printed literally.  This format
+will be repeated for as many lines as necessary.  If the amount of data
+isn't enough to completely fill the last line, it will be padded with
+NULL bytes.
+
+To specify both number_format and output_format is a fatal error.
 
 =item suppress_warnings
 
