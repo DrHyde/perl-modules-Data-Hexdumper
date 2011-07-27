@@ -32,16 +32,16 @@ my %num_bytes=(
 );
 
 my %number_format_to_new_format = (
-  'C'  => '  %a : %C %C %C %C %C %C %C %C %C %C %C %C %C %C %C %C : %d',
-  'S'  => '  %a : %S %S %S %S %S %S %S %S         : %d',
-  'S<' => '  %a : %S< %S< %S< %S< %S< %S< %S< %S<         : %d',
-  'S>' => '  %a : %S> %S> %S> %S> %S> %S> %S> %S>         : %d',
-  'L'  => '  %a : %L %L %L %L             : %d',
-  'L<' => '  %a : %L< %L< %L< %L<             : %d',
-  'L>' => '  %a : %L> %L> %L> %L>             : %d',
-  'Q'  => '  %a : %Q %Q               : %d',
-  'Q<' => '  %a : %Q< %Q<               : %d',
-  'Q>' => '  %a : %Q> %Q>               : %d',
+  'C'  => '  %4a : %C %C %C %C %C %C %C %C %C %C %C %C %C %C %C %C : %d',
+  'S'  => '  %4a : %S %S %S %S %S %S %S %S         : %d',
+  'S<' => '  %4a : %S< %S< %S< %S< %S< %S< %S< %S<         : %d',
+  'S>' => '  %4a : %S> %S> %S> %S> %S> %S> %S> %S>         : %d',
+  'L'  => '  %4a : %L %L %L %L             : %d',
+  'L<' => '  %4a : %L< %L< %L< %L<             : %d',
+  'L>' => '  %4a : %L> %L> %L> %L>             : %d',
+  'Q'  => '  %4a : %Q %Q               : %d',
+  'Q<' => '  %4a : %Q< %Q<               : %d',
+  'Q>' => '  %4a : %Q> %Q>               : %d',
 );
 
 =head1 NAME
@@ -60,7 +60,7 @@ Data::Hexdumper - Make binary data human-readable
     );
     print hexdump(
       "abcdefg",
-      { output_format => '%a : %C %S< %L> : %d' }
+      { output_format => '%4a : %C %S< %L> : %d' }
     );
 
 =head1 DESCRIPTION
@@ -150,9 +150,10 @@ This is an alternative and much more flexible (but more complex) method
 of specifying the output format.  Instead of specifying a single format
 for all your output, you can specify formats like:
 
-  %a : %C %S %L> %Q : %d
+  %4a : %C %S %L> %Q : %d
 
-which will, on each line, display first the address, then a space, then
+which will, on each line, display first the address (consisting of '0x'
+and 4 hexadecimal digits, zero-padded if necessary), then a space, then
 a colon, then a single byte of data, then a space, then an unsigned
 16-bit value in native endianness, then a space, then an unsigned 32-bit
 big-endian value, ... then a colon,
@@ -165,6 +166,9 @@ with formats - see sprintf for details.  To output a literal E<lt> or E<gt>
 character where it may be confused with any of the {S,L,Q}{E<lt>,E<gt>}
 sequences, use %E<lt> or %E<gt>.  So, for example, to output a 16-bit
 value in native endianness followed by <, use %S%<.
+
+%a takes an optional base-ten number between the % and the a signifying
+the number of hexadecimal digits.
 
 Anything else will get printed literally.  This format
 will be repeated for as many lines as necessary.  If the amount of data
@@ -242,6 +246,9 @@ sub hexdump {
   while(@format_elements_raw) {
     push @format_elements, shift(@format_elements_raw);
     if($format_elements[-1] eq '%') {
+      while(exists($format_elements_raw[0]) && $format_elements_raw[0] =~ /\d/) {
+        $format_elements[-1] .= shift(@format_elements_raw);
+      }
       if(exists($format_elements_raw[0]) && $format_elements_raw[0] =~ /[adCSLQ%<>]/) {
         $format_elements[-1] .= shift(@format_elements_raw);
       }
@@ -252,6 +259,9 @@ sub hexdump {
       ) { $format_elements[-1] .= shift(@format_elements_raw); }
     }
   }
+
+  # print STDERR "parsed '$output_format' as:\n  '".
+  #   join("', '", @format_elements)."'\n";
 
   my $chunk_length = 0;
   foreach my $format (grep { /^%[CSLQ]/ } @format_elements) {
@@ -282,8 +292,6 @@ sub hexdump {
     my $chunk = substr($data, 0, $chunk_length);
     $data = ($chunk eq $data) ? '' : substr($data, $chunk_length);
 
-    my $address = sprintf('0x%04X', $addr);
-    $addr += $chunk_length;
     my $characters = $chunk;
     # replace any non-printable character with .
     if($params{space_as_space}) {
@@ -295,8 +303,9 @@ sub hexdump {
     foreach my $format (@format_elements) {
       if(length($format) == 1) { # pass straight through
         $output .= $format;
-      } elsif($format eq '%a') { # address
-        $output .= $address;
+      } elsif($format =~ /%(\d*)a/) { # address
+        my $nibbles = $1 || 4;
+        $output .= sprintf("0x%0${nibbles}X", $addr);
       } elsif($format eq '%d') { # data
         $output .= $characters;
       } else {
@@ -308,6 +317,7 @@ sub hexdump {
       }
     }
     $output .= "\n";
+    $addr += $chunk_length;
   }
   $output;
 }
@@ -341,16 +351,16 @@ emit warnings.
 
 The mappings are:
 
-  'C'  => '  %a : %C %C %C %C %C %C %C %C %C %C %C %C %C %C %C %C : %d'
-  'S'  => '  %a : %S %S %S %S %S %S %S %S         : %d'
-  'S<' => '  %a : %S< %S< %S< %S< %S< %S< %S< %S<         : %d'
-  'S>' => '  %a : %S> %S> %S> %S> %S> %S> %S> %S>         : %d'
-  'L'  => '  %a : %L %L %L %L             : %d'
-  'L<' => '  %a : %L< %L< %L< %L<             : %d'
-  'L>' => '  %a : %L> %L> %L> %L>             : %d'
-  'Q'  => '  %a : %Q %Q               : %d'
-  'Q<' => '  %a : %Q< %Q<               : %d'
-  'Q>' => '  %a : %Q> %Q>               : %d'
+  'C'  => '  %4a : %C %C %C %C %C %C %C %C %C %C %C %C %C %C %C %C : %d'
+  'S'  => '  %4a : %S %S %S %S %S %S %S %S         : %d'
+  'S<' => '  %4a : %S< %S< %S< %S< %S< %S< %S< %S<         : %d'
+  'S>' => '  %4a : %S> %S> %S> %S> %S> %S> %S> %S>         : %d'
+  'L'  => '  %4a : %L %L %L %L             : %d'
+  'L<' => '  %4a : %L< %L< %L< %L<             : %d'
+  'L>' => '  %4a : %L> %L> %L> %L>             : %d'
+  'Q'  => '  %4a : %Q %Q               : %d'
+  'Q<' => '  %4a : %Q< %Q<               : %d'
+  'Q>' => '  %4a : %Q> %Q>               : %d'
 
 and of course:
 
