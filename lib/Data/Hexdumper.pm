@@ -32,16 +32,16 @@ my %num_bytes=(
 );
 
 my %number_format_to_new_format = (
-  'C'  => '  %4a : %C %C %C %C %C %C %C %C %C %C %C %C %C %C %C %C : %d',
-  'S'  => '  %4a : %S %S %S %S %S %S %S %S         : %d',
-  'S<' => '  %4a : %S< %S< %S< %S< %S< %S< %S< %S<         : %d',
-  'S>' => '  %4a : %S> %S> %S> %S> %S> %S> %S> %S>         : %d',
-  'L'  => '  %4a : %L %L %L %L             : %d',
-  'L<' => '  %4a : %L< %L< %L< %L<             : %d',
-  'L>' => '  %4a : %L> %L> %L> %L>             : %d',
-  'Q'  => '  %4a : %Q %Q               : %d',
-  'Q<' => '  %4a : %Q< %Q<               : %d',
-  'Q>' => '  %4a : %Q> %Q>               : %d',
+  'C'  => '  %4a : %16C : %d',
+  'S'  => '  %4a : %8S         : %d',
+  'S<' => '  %4a : %8S<         : %d',
+  'S>' => '  %4a : %8S>         : %d',
+  'L'  => '  %4a : %4L             : %d',
+  'L<' => '  %4a : %4L<             : %d',
+  'L>' => '  %4a : %4L>             : %d',
+  'Q'  => '  %4a : %2Q               : %d',
+  'Q<' => '  %4a : %2Q<               : %d',
+  'Q>' => '  %4a : %2Q>               : %d',
 );
 
 =head1 NAME
@@ -170,6 +170,10 @@ value in native endianness followed by <, use %S%<.
 %a takes an optional base-ten number between the % and the a signifying
 the number of hexadecimal digits.  This defaults to 4.
 
+%{C,S,L,Q} also take an optional base-ten number between the % and the letter,
+signifying the number of repeats.  These will be separated by spaces in
+the output.  So '%4C' is equivalent to '%C %C %C %C'.
+
 Anything else will get printed literally.  This format
 will be repeated for as many lines as necessary.  If the amount of data
 isn't enough to completely fill the last line, it will be padded with
@@ -179,7 +183,7 @@ To specify both number_format and output_format is a fatal error.
 
 If neither are given, output_format defaults to:
 
-  '  %a : %C %C %C %C %C %C %C %C %C %C %C %C %C %C %C %C : %d'
+  '  %4a : %16C : %d'
 
 which is equivalent to the old-style:
 
@@ -253,15 +257,24 @@ sub hexdump {
         $format_elements[-1] .= shift(@format_elements_raw);
       }
       if($format_elements[-1] =~ /%([%<>])/) { $format_elements[-1] = $1 }
-       elsif($format_elements[-1] =~ /%[QSL]/ &&
+       elsif($format_elements[-1] =~ /%\d*[QSL]/ &&
          exists($format_elements_raw[0]) &&
          $format_elements_raw[0] =~ /[<>]/
       ) { $format_elements[-1] .= shift(@format_elements_raw); }
     }
   }
 
-  # print STDERR "parsed '$output_format' as:\n  '".
-  #   join("', '", @format_elements)."'\n";
+  @format_elements = map {
+    my $format = $_;
+    my @r;
+    if($format =~ /^([^%]|%\d*a|%\D|%$)/) { push @r, $format; }
+     else {
+      $format =~ /^%(\d+)(.*)/;
+      push @r, ('%'.$2, ' ') x $1;
+      pop @r; # get rid of the last space
+    }
+    @r;
+  } @format_elements;
 
   my $chunk_length = 0;
   foreach my $format (grep { /^%[CSLQ]/ } @format_elements) {

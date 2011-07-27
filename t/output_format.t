@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 6;
+use Test::More tests => 7;
 
 use Data::Hexdumper qw(hexdump);
 
@@ -42,3 +42,10 @@ is(
   "0x00000000000 64636261 68676665\n0x00000000008 64636261 68676665\n",
   '%11a works'
 );
+
+is(
+  hexdump(data => 'abcdefgh', suppress_warnings => 1, output_format => '%a %2Q %3C %4S< %1L'),
+  hexdump(data => 'abcdefgh', suppress_warnings => 1, output_format => '%a %Q %Q %C %C %C %S< %S< %S< %S< %L'),
+  '%2Q %3C %4S< %1L == %Q %Q %C %C %C %S< %S< %S< %S< %L'
+);
+
