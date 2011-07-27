@@ -204,23 +204,27 @@ sub hexdump {
     }
 
     my %params=@params;
-    my($data, $number_format, $start_position, $end_position)=
-        @params{qw(data number_format start_position end_position)};
+    my($data, $number_format, $output_format, $start_position, $end_position)=
+        @params{qw(data number_format output_format start_position end_position)};
 
+    die("can't have both number_format and output_format\n")
+      if($output_format && $number_format);
     my $addr = $start_position ||= 0;
-    $number_format ||= 'C';
     $end_position ||= length($data)-1;
-    my $num_bytes = $num_bytes{$number_format};
-    if($number_format eq 'V') { $number_format = 'L<'; }
-    if($number_format eq 'N') { $number_format = 'L>'; }
-    if($number_format eq 'v') { $number_format = 'S<'; }
-    if($number_format eq 'n') { $number_format = 'S>'; }
+    if(!$output_format) {
+      $number_format ||= 'C';
+      if($number_format eq 'V') { $number_format = 'L<'; }
+      if($number_format eq 'N') { $number_format = 'L>'; }
+      if($number_format eq 'v') { $number_format = 'S<'; }
+      if($number_format eq 'n') { $number_format = 'S>'; }
+      $output_format = $number_format_to_new_format{$number_format} ||
+        die("number_format not recognised\n");
+    }
+    my $num_bytes = $num_bytes{$number_format}; # FIXME
 
     # sanity-check the parameters
-
     die("No data given to hexdump.") unless length($data);
     die("start_position must be numeric.") if($start_position=~/\D/);
-    die("number_format $number_format not recognised.") unless $num_bytes;
     die("end_position must be numeric.") if($end_position=~/\D/);
     die("end_position must not be before start_position.")
         if($end_position < $start_position);
