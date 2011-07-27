@@ -110,6 +110,7 @@ end of C<data>.
 
 This is deprecated.  See 'INCOMPATIBLE CHANGES' below.  If you use this
 your data will be padded with NULLs to be an integer multiple of 16 bytes.
+You can expect number_format to be removed at some point in 2014 or later.
 
 A string specifying how to format the data.  It can be any of the following,
 which you will notice have the same meanings as they do to perl's C<pack>
@@ -236,6 +237,8 @@ sub hexdump {
   $end_position ||= length($data)-1;
   if(!$output_format) {
     # $output_format = '  %a : %C %C %C %C %C %C %C %C %C %C %C %C %C %C %C %C : %d';
+    warn("Data::Hexdumper: number_format is deprecated\n")
+      if($number_format && !$params{suppress_warnings});
     $number_format ||= 'C';
     if($number_format eq 'V') { $number_format = 'L<'; }
     if($number_format eq 'N') { $number_format = 'L>'; }

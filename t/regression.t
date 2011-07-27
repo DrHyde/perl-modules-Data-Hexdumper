@@ -3,17 +3,18 @@
 
 use strict;
 
-use Test::More tests => 14;
+use Test::More tests => 16;
 
-use_ok('Data::Hexdumper', 'hexdump');
+use Data::Hexdumper qw(hexdump);
 
-eval { hexdump('foo', {number_format => 'R'}) };
+eval { hexdump('foo', {number_format => 'R', suppress_warnings => 1}) };
 ok($@, "invalid format is fatal: $@");
 
 is("\n".hexdump(
     data => join('', map { pack('C', $_) } (0x20 .. 0x3F)),
     number_format => 'N',
     start_position => 0,
+    suppress_warnings => 1,
     end_position => 0x1F
 ), q{
   0x0000 : 20212223 24252627 28292A2B 2C2D2E2F             : .!"#$%&'()*+,-./
@@ -25,6 +26,7 @@ ok("\n".hexdump(
     number_format => 'N',
     start_position => 0,
     end_position => 0x1F,
+    suppress_warnings => 1,
     space_as_space => 1
 ) eq q{
   0x0000 : 20212223 24252627 28292A2B 2C2D2E2F             :  !"#$%&'()*+,-./
@@ -33,6 +35,7 @@ ok("\n".hexdump(
 
 ok("\n".hexdump(
     data => join('', map { pack('C', $_) } (0x20 .. 0x3F)),
+    suppress_warnings => 1,
     number_format => 'N'
 ) eq q{
   0x0000 : 20212223 24252627 28292A2B 2C2D2E2F             : .!"#$%&'()*+,-./
@@ -43,6 +46,7 @@ my $results = '';
 foreach my $format(qw (C n v V)) { # same trivial test for other formats
     $results .= hexdump(
         data => join('', map { pack('C', $_) } (0x20 .. 0x3F)),
+        suppress_warnings => 1,
         number_format => $format 
     );
 }
@@ -59,6 +63,7 @@ ok("\n".$results eq q{
 
 ok("\n".hexdump(
     data => join('', map { pack('C', $_) } (0x10 .. 0x2F)),
+    suppress_warnings => 1,
     number_format => 'N'
 ) eq q{
   0x0000 : 10111213 14151617 18191A1B 1C1D1E1F             : ................
@@ -67,29 +72,37 @@ ok("\n".hexdump(
 
 ok(hexdump(
     data => join('', map { pack('C', $_) } (0x10 .. 0x2F)),
+    suppress_warnings => 1,
     number_format => 'S'
 ) eq hexdump(
     data => join('', map { pack('C', $_) } (0x10 .. 0x2F)),
+    suppress_warnings => 1,
     number_format => 'n'
 ) || hexdump(
     data => join('', map { pack('C', $_) } (0x10 .. 0x2F)),
+    suppress_warnings => 1,
     number_format => 'S'
 ) eq hexdump(
     data => join('', map { pack('C', $_) } (0x10 .. 0x2F)),
+    suppress_warnings => 1,
     number_format => 'v'
 ), "S eq n or v");
 
 ok(hexdump(
     data => join('', map { pack('C', $_) } (0x10 .. 0x2F)),
+    suppress_warnings => 1,
     number_format => 'L'
 ) eq hexdump(
     data => join('', map { pack('C', $_) } (0x10 .. 0x2F)),
+    suppress_warnings => 1,
     number_format => 'N'
 ) || hexdump(
     data => join('', map { pack('C', $_) } (0x10 .. 0x2F)),
+    suppress_warnings => 1,
     number_format => 'L'
 ) eq hexdump(
     data => join('', map { pack('C', $_) } (0x10 .. 0x2F)),
+    suppress_warnings => 1,
     number_format => 'V'
 ), "L eq N or V");
 
@@ -98,6 +111,7 @@ foreach my $format (qw(N n)) {
     foreach my $max (0x3C, 0x3D, 0x3E) {
         $results .= hexdump(
             data => join('', map { pack('C', $_) } (0x20 .. $max)),
+            suppress_warnings => 1,
             number_format => $format,
             suppress_warnings => 1
         );
@@ -132,6 +146,7 @@ ok(hexdump(
     data => join('', map { pack('C', $_) } (0x00 .. 0x3F)),
     number_format => 'N',
     start_position => 0,
+    suppress_warnings => 1,
     end_position => 0x1F,
     space_as_space => 1
 ) eq hexdump(
@@ -139,7 +154,23 @@ ok(hexdump(
     {
         number_format => 'N',
         start_position => 0,
+        suppress_warnings => 1,
         end_position => 0x1F,
         space_as_space => 1
     }
 ), 'hexdump($string, {... opts ...}) works');
+
+ok((Data::Hexdumper::LITTLEENDIAN &&
+    hexdump('abcdefghijklmnop', { suppress_warnings => 1, number_format => 'Q' }) eq 
+    hexdump('abcdefghijklmnop', { suppress_warnings => 1, number_format => 'Q<' })
+) || (
+    Data::Hexdumper::BIGENDIAN &&
+    hexdump('abcdefghijklmnop', { suppress_warnings => 1, number_format => 'Q' }) eq 
+    hexdump('abcdefghijklmnop', { suppress_warnings => 1, number_format => 'Q>' })
+), "64 bit native byte order works");
+is_deeply("\n".hexdump('abcdefghijklmnop', { suppress_warnings => 1, number_format => 'Q<' }) , q{
+  0x0000 : 6867666564636261 706F6E6D6C6B6A69               : abcdefghijklmnop
+}, "64 bit little-endian works");
+ok("\n".hexdump('abcdefghijklmnop', { suppress_warnings => 1, number_format => 'Q>' }) eq q{
+  0x0000 : 6162636465666768 696A6B6C6D6E6F70               : abcdefghijklmnop
+}, "64 bit big-endian works");
