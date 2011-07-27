@@ -168,7 +168,7 @@ sequences, use %E<lt> or %E<gt>.  So, for example, to output a 16-bit
 value in native endianness followed by <, use %S%<.
 
 %a takes an optional base-ten number between the % and the a signifying
-the number of hexadecimal digits.
+the number of hexadecimal digits.  This defaults to 4.
 
 Anything else will get printed literally.  This format
 will be repeated for as many lines as necessary.  If the amount of data
@@ -371,8 +371,10 @@ and of course:
 
 =head1 BUGS/LIMITATIONS
 
-Addresses are assumed to be 16 bit, so formatting may break if the end position
-has an address greater than 0xFFFF.
+Behaviour of %a is not defined if your file is too big.
+
+Behaviour of %NNa is not defined if NN is too big for your sprintf implementation
+to handle 0x%0${NN}X.
 
 =head1 FEEDBACK
 
