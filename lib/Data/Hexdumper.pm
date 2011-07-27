@@ -222,6 +222,11 @@ sub hexdump {
     }
     my $num_bytes = $num_bytes{$number_format}; # FIXME
 
+    my $chunk_length = 0;
+    foreach my $format ($output_format =~ /%(C|[SLQ][<>]?)/g) {
+      $chunk_length += $num_bytes{$format};
+    }
+
     # sanity-check the parameters
     die("No data given to hexdump.") unless length($data);
     die("start_position must be numeric.") if($start_position=~/\D/);
