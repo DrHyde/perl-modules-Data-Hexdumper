@@ -1,4 +1,4 @@
-3.00    2011-XX-XX      Add output_format.  Minor incompatible change for
+3.00    2011-07-28      Add output_format.  Minor incompatible change for
                           number_format.
 
 2.01    2009-03-03      Bugfix: Q< and Q> now work on pre- perl 5.10;
