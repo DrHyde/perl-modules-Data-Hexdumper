@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use vars qw($VERSION @ISA @EXPORT);
 
-$VERSION = "3.00";
+$VERSION = "3.0001";
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -65,7 +65,7 @@ Data::Hexdumper - Make binary data human-readable
 
 =head1 DESCRIPTION
 
-C<Data::Hexdumper> provides a simple way to format arbitary binary data
+C<Data::Hexdumper> provides a simple way to format arbitrary binary data
 into a nice human-readable format, somewhat similar to the Unix 'hexdump'
 utility.
 
@@ -405,7 +405,7 @@ is on Github:
 
 =head1 AUTHOR, COPYRIGHT and LICENCE
 
-Copyright 2001 - 2011 David Cantrell E<lt>F<david@cantrell.org.uk>E<gt>
+Copyright 2001 - 2012 David Cantrell E<lt>F<david@cantrell.org.uk>E<gt>
 
 This software is free-as-in-speech software, and may be used,
 distributed, and modified under the terms of either the GNU
