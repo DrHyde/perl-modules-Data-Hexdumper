@@ -10,3 +10,4 @@ ARTISTIC.txt
 GPL2.txt
 t/endianspecifiers.t
 t/output_format.t
+MANIFEST.SKIP
