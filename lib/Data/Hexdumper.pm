@@ -394,9 +394,7 @@ to handle 0x%0${NN}X.
 
 =head1 FEEDBACK
 
-I welcome constructive criticism and bug reports.  Please report bugs either
-by email or via RT:
-  L<http://rt.cpan.org/Public/Dist/Display.html?Name=Data-Hexdumper>
+Bug reports should be made on Github or by email.
 
 The best bug reports contain a test file that fails with the current
 code, and will pass once it has been fixed.  The code repository
