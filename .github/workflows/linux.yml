@@ -6,7 +6,7 @@ jobs:
     name: list available perl versions
     runs-on: 'ubuntu-latest'
     steps:
-      - uses: shogo82148/actions-setup-perl@v1
+      - uses: shogo82148/actions-setup-perl@v1.8.3
       - id: set-matrix
         name: list available perl versions
         shell: perl {0}
